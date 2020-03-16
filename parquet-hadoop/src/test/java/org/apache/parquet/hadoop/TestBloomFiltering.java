@@ -126,16 +126,26 @@ public class TestBloomFiltering {
     return list;
   }
 
+//  private static List<PhoneBookWriter.PhoneNumber> generatePhoneNumbers() {
+//    int length = RANDOM.nextInt(5) - 1;
+//    if (length < 0) {
+//      return null;
+//    }
+//    List<PhoneBookWriter.PhoneNumber> phoneNumbers = new ArrayList<>(length);
+//    for (int i = 0; i < length; ++i) {
+//      // 6 digits numbers
+//      long number = Math.abs(RANDOM.nextLong() % 900000) + 100000;
+//      phoneNumbers.add(new PhoneBookWriter.PhoneNumber(number, PHONE_KINDS[RANDOM.nextInt(PHONE_KINDS.length)]));
+//    }
+//    return phoneNumbers;
+//  }
+
   private static List<PhoneBookWriter.PhoneNumber> generatePhoneNumbers() {
-    int length = RANDOM.nextInt(5) - 1;
-    if (length < 0) {
-      return null;
-    }
+    int length = RANDOM.nextInt(3);
     List<PhoneBookWriter.PhoneNumber> phoneNumbers = new ArrayList<>(length);
-    for (int i = 0; i < length; ++i) {
-      // 6 digits numbers
-      long number = Math.abs(RANDOM.nextLong() % 900000) + 100000;
-      phoneNumbers.add(new PhoneBookWriter.PhoneNumber(number, PHONE_KINDS[RANDOM.nextInt(PHONE_KINDS.length)]));
+    int v = RANDOM.nextInt(PHONE_KINDS.length);
+    for(int i = 0; i < length; ++i) {
+      phoneNumbers.add(new PhoneBookWriter.PhoneNumber(v, PHONE_KINDS[v]));
     }
     return phoneNumbers;
   }
@@ -211,6 +221,7 @@ public class TestBloomFiltering {
     column2NDVMap.put("location.lat", 10000L);
     column2NDVMap.put("name", 10000L);
     column2NDVMap.put("id", 10000L);
+    column2NDVMap.put("phoneNumbers.phone", 10000L);
     PhoneBookWriter.write(ExampleParquetWriter.builder(FILE_V1)
         .withWriteMode(OVERWRITE)
         .withRowGroupSize(rowGroupSize)
@@ -254,4 +265,15 @@ public class TestBloomFiltering {
       },
       eq(doubleColumn("location.lat"), 99.9));
   }
+
+    @Test
+    public void testArrayFiltering() throws IOException {
+      long v = Long.valueOf(RANDOM.nextInt(PHONE_KINDS.length));
+        assertCorrectFiltering(
+                record -> {
+                    PhoneBookWriter.PhoneNumber phoneNumber = record.getPhoneNumbers().get(0);
+                    return phoneNumber != null && phoneNumber.getNumber() == v;
+                },
+                eq(longColumn("phoneNumbers.phone.number"), v));
+    }
 }

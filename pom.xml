@@ -473,6 +473,7 @@
         <version>${japicmp.version}</version>
         <configuration>
           <parameter>
+            <ignoreMissingOldVersion>true</ignoreMissingOldVersion>
             <oldVersionPattern>${previous.version}</oldVersionPattern>
             <breakBuildBasedOnSemanticVersioning>true</breakBuildBasedOnSemanticVersioning>
             <onlyModified>true</onlyModified>
